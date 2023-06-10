@@ -36,10 +36,6 @@ pub struct Lexer {
     ch: char,
 }
 
-fn is_letter(ch: char) -> bool {
-    'a' <= ch.to_ascii_lowercase() && ch.to_ascii_lowercase() <= 'z' || ch == '_'
-}
-
 impl Lexer {
     pub fn new(input: String) -> Self {
         let mut lexer = Lexer {
@@ -75,7 +71,7 @@ impl Lexer {
     pub fn read_identifier(&mut self) -> String {
         let starting_position = self.position;
 
-        while is_letter(self.ch) {
+        while self.ch.is_letter() {
             self.read_char()
         }
 
@@ -137,7 +133,7 @@ impl Lexer {
             '>' => token = Token::GreaterThan,
             '\0' => token = Token::Eof,
             _ => {
-                if is_letter(self.ch) {
+                if self.ch.is_letter() {
                     let ident = self.read_identifier();
 
                     token = match ident.as_str() {
@@ -163,6 +159,16 @@ impl Lexer {
         self.read_char();
 
         token
+    }
+}
+
+trait IsLetter {
+    fn is_letter(&self) -> bool;
+}
+
+impl IsLetter for char {
+    fn is_letter(&self) -> bool {
+        'a' <= self.to_ascii_lowercase() && self.to_ascii_lowercase() <= 'z' || self == &'_'
     }
 }
 
