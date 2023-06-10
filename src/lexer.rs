@@ -14,6 +14,19 @@ pub enum Token {
     RBrace,
     Function,
     Let,
+    Bang,
+    Minus,
+    Slash,
+    Asterisk,
+    LessThan,
+    GreaterThan,
+    If,
+    Else,
+    Return,
+    True,
+    False,
+    EqualEqual,
+    NotEqual,
 }
 
 pub struct Lexer {
@@ -52,6 +65,13 @@ impl Lexer {
         self.read_position += 1;
     }
 
+    pub fn peek_char(&self) -> char {
+        self.input
+            .get(self.read_position)
+            .unwrap_or(&'\0')
+            .to_owned()
+    }
+
     pub fn read_identifier(&mut self) -> String {
         let starting_position = self.position;
 
@@ -87,7 +107,14 @@ impl Lexer {
         let token: Token;
 
         match self.ch {
-            '=' => token = Token::Equal,
+            '=' => {
+                if self.peek_char() == '=' {
+                    self.read_char();
+                    token = Token::EqualEqual;
+                } else {
+                    token = Token::Equal;
+                }
+            }
             ';' => token = Token::Semicolon,
             '(' => token = Token::LParen,
             ')' => token = Token::RParen,
@@ -95,6 +122,19 @@ impl Lexer {
             '+' => token = Token::Plus,
             '{' => token = Token::LBrace,
             '}' => token = Token::RBrace,
+            '!' => {
+                if self.peek_char() == '=' {
+                    self.read_char();
+                    token = Token::NotEqual;
+                } else {
+                    token = Token::Bang;
+                }
+            }
+            '-' => token = Token::Minus,
+            '/' => token = Token::Slash,
+            '*' => token = Token::Asterisk,
+            '<' => token = Token::LessThan,
+            '>' => token = Token::GreaterThan,
             '\0' => token = Token::Eof,
             _ => {
                 if is_letter(self.ch) {
@@ -103,6 +143,11 @@ impl Lexer {
                     token = match ident.as_str() {
                         "fn" => Token::Function,
                         "let" => Token::Let,
+                        "if" => Token::If,
+                        "else" => Token::Else,
+                        "return" => Token::Return,
+                        "true" => Token::True,
+                        "false" => Token::False,
                         _ => Token::Ident(ident),
                     };
                 } else if self.ch.is_ascii_digit() {
@@ -134,6 +179,17 @@ mod tests {
         x + y;
         };
         let result = add(five, ten);
+        !-/*5;
+        5 < 10 > 5;
+
+        if (5 < 10) {
+            return true;
+        } else {
+            return false;
+        }
+
+        10 == 10;
+        10 != 9;
         ";
 
         let tests = vec![
@@ -172,6 +228,43 @@ mod tests {
             Token::Comma,
             Token::Ident("ten".to_string()),
             Token::RParen,
+            Token::Semicolon,
+            Token::Bang,
+            Token::Minus,
+            Token::Slash,
+            Token::Asterisk,
+            Token::Int("5".to_string()),
+            Token::Semicolon,
+            Token::Int("5".to_string()),
+            Token::LessThan,
+            Token::Int("10".to_string()),
+            Token::GreaterThan,
+            Token::Int("5".to_string()),
+            Token::Semicolon,
+            Token::If,
+            Token::LParen,
+            Token::Int("5".to_string()),
+            Token::LessThan,
+            Token::Int("10".to_string()),
+            Token::RParen,
+            Token::LBrace,
+            Token::Return,
+            Token::True,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Else,
+            Token::LBrace,
+            Token::Return,
+            Token::False,
+            Token::Semicolon,
+            Token::RBrace,
+            Token::Int("10".to_string()),
+            Token::EqualEqual,
+            Token::Int("10".to_string()),
+            Token::Semicolon,
+            Token::Int("10".to_string()),
+            Token::NotEqual,
+            Token::Int("9".to_string()),
             Token::Semicolon,
             Token::Eof,
         ];
