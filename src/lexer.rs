@@ -50,7 +50,23 @@ impl Lexer {
         lexer
     }
 
-    pub fn read_char(&mut self) {
+    pub fn all_tokens(&mut self) -> Vec<Token> {
+        let mut tokens: Vec<Token> = Vec::new();
+
+        loop {
+            let token = self.next_token();
+
+            if token == Token::Eof {
+                break;
+            }
+
+            tokens.push(token);
+        }
+
+        tokens
+    }
+
+    fn read_char(&mut self) {
         self.ch = self
             .input
             .get(self.read_position)
@@ -61,14 +77,14 @@ impl Lexer {
         self.read_position += 1;
     }
 
-    pub fn peek_char(&self) -> char {
+    fn peek_char(&self) -> char {
         self.input
             .get(self.read_position)
             .unwrap_or(&'\0')
             .to_owned()
     }
 
-    pub fn read_identifier(&mut self) -> String {
+    fn read_identifier(&mut self) -> String {
         let starting_position = self.position;
 
         while self.ch.is_letter() {
@@ -80,7 +96,7 @@ impl Lexer {
             .collect();
     }
 
-    pub fn read_digit(&mut self) -> String {
+    fn read_digit(&mut self) -> String {
         let starting_position = self.position;
 
         while self.ch.is_ascii_digit() {
