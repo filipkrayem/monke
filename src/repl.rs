@@ -3,7 +3,7 @@ use rustyline::{DefaultEditor, Result};
 
 use crate::lexer;
 
-const PROMPT: &'static str = ">>> ";
+const PROMPT: &str = ">>> ";
 
 pub fn read() -> Result<()> {
     let mut rl = DefaultEditor::new()?;

@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+use crate::utils::map_token_to_literal::map_token_to_literal;
+
+#[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Ident(String),
     Int(String),
@@ -27,4 +29,14 @@ pub enum Token {
     False,
     EqualEqual,
     NotEqual,
+}
+
+pub trait Literal {
+    fn literal(&self) -> String;
+}
+
+impl Literal for Token {
+    fn literal(&self) -> String {
+        return map_token_to_literal(self);
+    }
 }
