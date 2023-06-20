@@ -1,4 +1,4 @@
-use crate::ast::Expression;
+use crate::expressions::Expression;
 use crate::token::Literal;
 use crate::token::Token;
 

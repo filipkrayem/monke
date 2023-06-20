@@ -1,7 +1,8 @@
 use crate::{
-    ast::{LetStatement, Program, Statement},
+    ast::Program,
     identifier::Identifier,
     lexer::Lexer,
+    statements::{LetStatement, ReturnStatement, Statement},
     token::Token,
 };
 
@@ -51,6 +52,7 @@ impl Parser<'_> {
     fn parse_statement(&mut self) -> Option<Box<dyn Statement>> {
         let val = match self.current_token {
             Token::Let => return self.parse_let_statement(),
+            Token::Return => return self.parse_return_statement(),
             _ => None,
         };
         return val;
@@ -85,6 +87,19 @@ impl Parser<'_> {
             if self.current_token == Token::Semicolon {
                 break;
             }
+            self.next_token();
+        }
+
+        return Some(Box::new(statement));
+    }
+
+    fn parse_return_statement(&mut self) -> Option<Box<dyn Statement>> {
+        let statement = ReturnStatement {
+            token: self.current_token.clone(),
+            return_value: Box::new(Identifier::new(&Token::Illegal)),
+        };
+
+        if !self.current_is(Token::Semicolon) {
             self.next_token();
         }
 

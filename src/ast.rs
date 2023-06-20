@@ -1,54 +1,7 @@
-use crate::{
-    identifier::Identifier, token::Token, utils::map_token_to_literal::map_token_to_literal,
-};
-use std::any::Any;
-
-trait Node {
-    fn token_literal(&self) -> String;
-}
-
-pub trait Statement {
-    fn token_literal(&self) -> String;
-    fn statement_node(&self);
-    fn as_any(&self) -> &dyn Any;
-}
-
-pub trait Expression {
-    fn token_literal(&self) -> String;
-    fn expression_node(&self);
-}
-
-impl std::fmt::Debug for dyn Expression {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.token_literal())
-    }
-}
-
-impl std::fmt::Debug for dyn Statement {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "{}", self.token_literal())
-    }
-}
+use crate::statements::Statement;
 
 pub struct Program {
     pub statements: Vec<Box<dyn Statement>>,
-}
-
-#[derive(Debug)]
-pub struct LetStatement {
-    pub token: Token,
-    pub name: Box<Identifier>,
-    pub value: Box<dyn Expression>,
-}
-
-impl Statement for LetStatement {
-    fn statement_node(&self) {}
-    fn token_literal(&self) -> String {
-        return map_token_to_literal(&self.token);
-    }
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
 }
 
 impl Program {
@@ -64,9 +17,12 @@ impl Program {
 #[cfg(test)]
 mod tests {
 
-    use crate::{ast::Expression, ast::LetStatement, lexer::*, parser::Parser};
-
-    use super::Statement;
+    use crate::{
+        expressions::Expression,
+        lexer::*,
+        parser::Parser,
+        statements::{LetStatement, Statement},
+    };
 
     #[test]
     fn let_statements() {
@@ -88,6 +44,26 @@ mod tests {
             if !test_let_statement(statement, test) {
                 return;
             }
+        }
+    }
+
+    #[test]
+    fn return_statements() {
+        let input = "
+        return 5;
+        return 420;
+        return add(5);
+        ";
+
+        let mut lexer = Lexer::new(input.to_owned());
+        let mut parser = Parser::new(&mut lexer);
+
+        let program = parser.parse_program();
+
+        assert_eq!(program.statements.len(), 3);
+
+        for statement in program.statements {
+            assert_eq!(statement.token_literal(), "return");
         }
     }
 
