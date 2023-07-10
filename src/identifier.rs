@@ -1,3 +1,5 @@
+use std::any::Any;
+
 use crate::expressions::Expression;
 use crate::token::Literal;
 use crate::token::Token;
@@ -22,4 +24,10 @@ impl Expression for Identifier {
         return self.token.literal();
     }
     fn expression_node(&self) {}
+    fn string(&self) -> String {
+        return self.value.clone();
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
 }

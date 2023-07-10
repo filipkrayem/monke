@@ -8,6 +8,7 @@ pub trait Statement {
     fn token_literal(&self) -> String;
     fn statement_node(&self);
     fn as_any(&self) -> &dyn Any;
+    fn string(&self) -> String;
 }
 
 impl std::fmt::Debug for dyn Statement {
@@ -35,6 +36,14 @@ impl Statement for LetStatement {
     fn as_any(&self) -> &dyn Any {
         self
     }
+    fn string(&self) -> String {
+        format!(
+            "{} {} = {};",
+            self.token_literal(),
+            self.name.string(),
+            self.value.string()
+        )
+    }
 }
 
 #[derive(Debug)]
@@ -50,5 +59,33 @@ impl Statement for ReturnStatement {
     }
     fn as_any(&self) -> &dyn Any {
         self
+    }
+    fn string(&self) -> String {
+        format!("{} {};", self.token_literal(), self.return_value.string())
+    }
+}
+
+#[derive(Debug)]
+pub struct ExpressionStatement {
+    pub token: Token,
+    pub expression: Box<dyn Expression>,
+}
+
+impl Statement for ExpressionStatement {
+    fn statement_node(&self) {}
+    fn token_literal(&self) -> String {
+        return map_token_to_literal(&self.token);
+    }
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn string(&self) -> String {
+        self.expression.string()
+    }
+}
+
+impl ExpressionStatement {
+    pub fn new(token: Token, expression: Box<dyn Expression>) -> ExpressionStatement {
+        return ExpressionStatement { token, expression };
     }
 }

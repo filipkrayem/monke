@@ -12,6 +12,13 @@ impl Program {
             return String::from("");
         }
     }
+    pub fn string(&self) -> String {
+        let mut out = String::new();
+        for statement in &self.statements {
+            out.push_str(&statement.string());
+        }
+        return out;
+    }
 }
 
 #[cfg(test)]
@@ -19,10 +26,14 @@ mod tests {
 
     use crate::{
         expressions::Expression,
+        identifier::Identifier,
         lexer::*,
         parser::Parser,
         statements::{LetStatement, Statement},
+        token::Token,
     };
+
+    use super::Program;
 
     #[test]
     fn let_statements() {
@@ -79,5 +90,17 @@ mod tests {
         }
 
         return true;
+    }
+
+    #[test]
+    fn test_string() {
+        let program = Program {
+            statements: vec![Box::new(LetStatement {
+                token: Token::Let,
+                name: Box::new(Identifier::new(&Token::Ident(String::from("myVar")))),
+                value: Box::new(Identifier::new(&Token::Ident(String::from("anotherVar")))),
+            })],
+        };
+        assert_eq!(program.string(), "let myVar = anotherVar;");
     }
 }
